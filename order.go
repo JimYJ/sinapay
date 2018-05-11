@@ -76,7 +76,7 @@ func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAt
 // return: 交易订单号,充值状态,线下支付收款单位,线下支付收款账户,线下支付收款账号开户行,线下支付收款备注,收银台重定向地址
 func CreateHostingDeposit(tradeID, summary, userID, userIP, amount, userFee, cardAttr, cardtype, bankCode string, accountType, mode int) (map[string]string, error) {
 	data := initBaseParam()
-	data["service"] = "query_bank_card"
+	data["service"] = "create_hosting_deposit"
 	data["identity_id"] = strings.TrimSpace(userID)
 	data["identity_type"] = "UID"
 	data["amount"] = amount
