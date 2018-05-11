@@ -43,7 +43,7 @@ func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAt
 		data["collect_trade_type"] = "pre_auth"
 	}
 	// data["extend_param"] = ""
-	rs, err := Request(&data, OrderMode)
+	rs, err := Request(&data, UserMode)
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -94,7 +94,7 @@ func CreateHostingDeposit(tradeID, summary, userID, userIP, amount, userFee, car
 		data["cashdesk_addr_category"] = "MOBILE"
 	}
 	// data["extend_param"] = ""
-	rs, err := Request(&data, OrderMode)
+	rs, err := Request(&data, UserMode)
 	if err != nil {
 		log.Println(err)
 		return nil, err
