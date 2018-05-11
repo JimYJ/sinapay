@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -252,4 +253,15 @@ func decryptResponData(data *map[string]interface{}, decryptlist map[string]bool
 func TestMode() {
 	userURL = "https://testgate.pay.sina.com.cn/mgs/gateway.do"
 	orderURL = "https://testgate.pay.sina.com.cn/mas/gateway.do"
+}
+
+// 拼接支付方式
+func handlePayMethod(cardAttr, cardtype, amount, bankCode string) string {
+	amount = strings.TrimSpace(amount)
+	cardAttr = strings.TrimSpace(cardAttr)
+	cardtype = strings.TrimSpace(cardtype)
+	if bankCode == "" {
+		bankCode = "SINAPAY"
+	}
+	return fmt.Sprintf("online_bank^%s^%s,%s,%s", amount, bankCode, cardAttr, cardtype)
 }

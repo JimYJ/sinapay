@@ -734,8 +734,8 @@ func ChangeBankMobile(userID, cardID, phone string) (string, error) {
 	data["service"] = "change_bank_mobile"
 	data["identity_id"] = strings.TrimSpace(userID)
 	data["identity_type"] = "UID"
-	data["card_id"] = cardID
-	data["phone_no"] = phone
+	data["card_id"] = strings.TrimSpace(cardID)
+	data["phone_no"] = strings.TrimSpace(phone)
 	// data["extend_param"] = ""
 	rs, err := Request(&data, UserMode)
 	if err != nil {
