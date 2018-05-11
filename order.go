@@ -77,6 +77,7 @@ func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAt
 func CreateHostingDeposit(tradeID, summary, userID, userIP, amount, userFee, cardAttr, cardtype, bankCode string, accountType, mode int) (map[string]string, error) {
 	data := initBaseParam()
 	data["service"] = "create_hosting_deposit"
+	data["out_trade_no"] = strings.TrimSpace(tradeID)
 	data["identity_id"] = strings.TrimSpace(userID)
 	data["identity_type"] = "UID"
 	data["amount"] = amount
