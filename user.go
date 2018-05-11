@@ -725,3 +725,45 @@ func FindVerifyMobile(userID, notifyURL, returnURL string, mode int) (string, er
 	}
 	return rsMap["redirect_url"].(string), nil
 }
+
+// ChangeBankMobile 修改银行预留手机 weibopay服务名称：change_bank_mobile
+// param: 用户ID,卡ID,手机号
+// return: ticket(推进接口用)
+func ChangeBankMobile(userID, cardID, phone string) (string, error) {
+	data := initBaseParam()
+	data["service"] = "change_bank_mobile"
+	data["identity_id"] = strings.TrimSpace(userID)
+	data["identity_type"] = "UID"
+	data["card_id"] = cardID
+	data["phone_no"] = phone
+	// data["extend_param"] = ""
+	rs, err := Request(&data, UserMode)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	rsMap, err := checkResponseCode(rs)
+	if err != nil {
+		return "", err
+	}
+	return rsMap["ticket"].(string), nil
+}
+
+//ChangeBankMobileAdvance 修改银行预留手机推进 weibopay服务名称：change_bank_mobile_advance
+func ChangeBankMobileAdvance(ticket, validCode string) (string, string, error) {
+	data := initBaseParam()
+	data["service"] = "change_bank_mobile_advance"
+	data["ticket"] = strings.TrimSpace(ticket)
+	data["valid_code"] = strings.TrimSpace(validCode)
+	// data["extend_param"] = ""
+	rs, err := Request(&data, UserMode)
+	if err != nil {
+		log.Println(err)
+		return "", "", err
+	}
+	rsMap, err := checkResponseCode(rs)
+	if err != nil {
+		return "", "", err
+	}
+	return rsMap["card_id"].(string), rsMap["is_verified"].(string), nil
+}
