@@ -15,13 +15,7 @@ const (
 	RedirectURLPC
 )
 
-//查询账户模式
-const (
-	UserAccount = iota
-	MemberAccount
-)
-
-//查询账户类型
+//查询账户类型 个人账户推荐使用存钱罐SavingPot操作资金,基本户存在限额限次的问题
 const (
 	Basic = iota
 	Ensure
@@ -42,6 +36,14 @@ const (
 	CollectionAll               //代收-全部
 )
 
+// 用户账户标识类型 identity_type
+const (
+	UID = iota
+	MemberID
+	Email
+	Mobile
+)
+
 var (
 	acountTypeList   = []string{"BASIC", "ENSURE", "RESERVE", "SAVING_POT", "BANK"}
 	defaultPageNo    = "1"
@@ -49,16 +51,17 @@ var (
 	freezeNoPrefix   = "FZ"
 	unfreezeNoPrefix = "NF"
 	outTradeCodeList = []string{"1000", "1001", "1002", "2000", "2001", "2001"}
+	identityTypeList = []string{"UID", "MEMBER_ID", "MOBILE", "EMAIL"}
 )
 
 // CreateActiveMember 创建激活会员 weibopay服务名称：create_activate_member
-// param :用户请求IP,用户ID
-func CreateActiveMember(userIP, userID string) error {
+// param :用户请求IP,用户ID,用户账户标识类型:UID
+func CreateActiveMember(userIP, userID string, identityType int) error {
 	data := initBaseParam()
 	data["service"] = "create_activate_member"
 	data["client_ip"] = strings.TrimSpace(userIP)
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	data["member_type"] = "1"
 	// data["extend_param"] = ""
 	rs, err := Request(&data, UserMode)
@@ -74,12 +77,12 @@ func CreateActiveMember(userIP, userID string) error {
 }
 
 // SetRealName 设置用户实名信息  weibopay服务名称：set_real_name
-// param :用户ID,真实姓名,身份证号,用户请求IP
-func SetRealName(userID, realname, IDNumber, userIP string) error {
+// param :用户ID,真实姓名,身份证号,用户请求IP,用户账户标识类型:UID
+func SetRealName(userID, realname, IDNumber, userIP string, identityType int) error {
 	data := initBaseParam()
 	data["service"] = "set_real_name"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	data["real_name"] = strings.TrimSpace(realname)
 	data["cert_type"] = "IC"
 	data["cert_no"] = strings.TrimSpace(IDNumber)
@@ -99,13 +102,13 @@ func SetRealName(userID, realname, IDNumber, userIP string) error {
 }
 
 // SetPayPassword 设置支付密码 weibopay服务名称：set_pay_password
-// param: 用户ID,委托扣款展示方式(可空),同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC:返回PC页面
+// param: 用户ID,委托扣款展示方式(可空),同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC:返回PC页面,用户账户标识类型:UID
 // return: 转跳页面
-func SetPayPassword(userID, withholdParam, returnURL, notifyURL string, mode int) (string, error) {
+func SetPayPassword(userID, withholdParam, returnURL, notifyURL string, mode, identityType int) (string, error) {
 	data := initBaseParam()
 	data["service"] = "set_pay_password"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	if notifyURL != "" {
 		data["notify_url"] = strings.TrimSpace(notifyURL)
 	}
@@ -133,13 +136,13 @@ func SetPayPassword(userID, withholdParam, returnURL, notifyURL string, mode int
 }
 
 // ModifyPayPassword 修改支付密码 weibopay服务名称：modify_pay_password
-// param: 用户ID,同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面
+// param: 用户ID,同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面,用户账户标识类型:UID
 // return: 转跳页面
-func ModifyPayPassword(userID, returnURL, notifyURL string, mode int) (string, error) {
+func ModifyPayPassword(userID, returnURL, notifyURL string, mode, identityType int) (string, error) {
 	data := initBaseParam()
 	data["service"] = "modify_pay_password"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	if notifyURL != "" {
 		data["notify_url"] = strings.TrimSpace(notifyURL)
 	}
@@ -163,13 +166,13 @@ func ModifyPayPassword(userID, returnURL, notifyURL string, mode int) (string, e
 }
 
 // FindPayPass 找回支付密码 weibopay服务名称：find_pay_password
-// param: 用户ID,同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面
+// param: 用户ID,同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面,用户账户标识类型:UID
 // return: 转跳页面
-func FindPayPass(userID, returnURL, notifyURL string, mode int) (string, error) {
+func FindPayPass(userID, returnURL, notifyURL string, mode, identityType int) (string, error) {
 	data := initBaseParam()
 	data["service"] = "find_pay_password"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	if notifyURL != "" {
 		data["notify_url"] = strings.TrimSpace(notifyURL)
 	}
@@ -193,13 +196,13 @@ func FindPayPass(userID, returnURL, notifyURL string, mode int) (string, error) 
 }
 
 // QueryisSetPayPassword 检测是否已设置支付密码 weibopay服务名称： query_is_set_pay_password
-// param: 用户ID
+// param: 用户ID,同步回跳页面(可空),异步通知接口(可空),用户账户标识类型:UID
 // return: 转跳页面
-func QueryisSetPayPassword(userID, returnURL, notifyURL string) (string, error) {
+func QueryisSetPayPassword(userID, returnURL, notifyURL string, identityType int) (string, error) {
 	data := initBaseParam()
 	data["service"] = "query_is_set_pay_password"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	// data["extend_param"] = ""
 	rs, err := Request(&data, UserMode)
 	if err != nil {
@@ -214,13 +217,13 @@ func QueryisSetPayPassword(userID, returnURL, notifyURL string) (string, error) 
 }
 
 // BindingBankCard 绑定银行卡 weibopay服务名称： binding_bank_card 默认SIGN模式
-// param: 用户ID,用户IP,银行编号,银行卡号,账户姓名,账户绑定手机,省份,城市
+// param: 用户ID,用户IP,银行编号,银行卡号,账户姓名,账户绑定手机,省份,城市,用户账户标识类型:UID
 // return: 卡ID(SIGN模式不返回),是否验证银行信息(SIGN模式不返回),绑卡推进ticket
-func BindingBankCard(userID, userIP, bankCode, bankAccountNo, accounName, phone, province, city string) (string, error) {
+func BindingBankCard(userID, userIP, bankCode, bankAccountNo, accounName, phone, province, city string, identityType int) (string, error) {
 	data := initBaseParam()
 	data["service"] = "binding_bank_card"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	data["request_no"] = strconv.FormatInt(time.Now().Local().UnixNano(), 10)
 	data["bank_code"] = strings.TrimSpace(bankCode)
 	data["bank_account_no"] = strings.TrimSpace(bankAccountNo)
@@ -273,13 +276,13 @@ func BindingBankCardAdvance(ticket, validCode, userIP string) (string, string, e
 }
 
 // UnbindingBankCard 解绑银行卡 weibopay服务名称：unbinding_bank_card
-// param: 用户ID,用户IP,卡ID
+// param: 用户ID,用户IP,卡ID,用户账户标识类型:UID
 // return: 解绑推进ticket
-func UnbindingBankCard(userID, userIP, cardID string) (string, error) {
+func UnbindingBankCard(userID, userIP, cardID string, identityType int) (string, error) {
 	data := initBaseParam()
 	data["service"] = "unbinding_bank_card"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	data["card_id"] = cardID
 	data["advance_flag"] = "Y"
 	data["client_ip"] = strings.TrimSpace(userIP)
@@ -297,12 +300,12 @@ func UnbindingBankCard(userID, userIP, cardID string) (string, error) {
 }
 
 // UnbindingBankCardAdvance 解绑银行卡推进 weibopay服务名称：unbinding_bank_card_advance
-// param: 用户ID,用户IP,解绑银行卡返回的ticket,短信验证码
-func UnbindingBankCardAdvance(userID, userIP, ticket, validCode string) error {
+// param: 用户ID,用户IP,解绑银行卡返回的ticket,短信验证码,用户账户标识类型:UID
+func UnbindingBankCardAdvance(userID, userIP, ticket, validCode string, identityType int) error {
 	data := initBaseParam()
 	data["service"] = "unbinding_bank_card_advance"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	data["ticket"] = strings.TrimSpace(ticket)
 	data["valid_code"] = strings.TrimSpace(validCode)
 	data["client_ip"] = strings.TrimSpace(userIP)
@@ -320,13 +323,13 @@ func UnbindingBankCardAdvance(userID, userIP, ticket, validCode string) error {
 }
 
 // QueryBankCard 查询银行卡 weibopay服务名称：query_bank_card
-// param: 用户ID,卡ID
+// param: 用户ID,卡ID,用户账户标识类型:UID
 // return: 卡列表
-func QueryBankCard(userID, cardID string) ([]map[string]string, error) {
+func QueryBankCard(userID, cardID string, identityType int) ([]map[string]string, error) {
 	data := initBaseParam()
 	data["service"] = "query_bank_card"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	if cardID != "" {
 		data["card_id"] = cardID
 	}
@@ -361,20 +364,16 @@ func QueryBankCard(userID, cardID string) ([]map[string]string, error) {
 }
 
 // QueryBalance 查询余额/基金份额 weibopay服务名称：query_balance
-// param:用户ID,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户 ,查询模式:MemberAccount查询自己账户,UserAccount查询用户
+// param:用户ID,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户 ,用户账户标识类型:UID,MemberID,Email,Mobile
 // return: 余额/基金份额,可用余额/基金份额,存钱罐收益(非查询存钱罐时为nil)
-func QueryBalance(userID string, accountType, mode int) (string, string, map[string]string, error) {
+func QueryBalance(userID string, accountType, identityType int) (string, string, map[string]string, error) {
 	data := initBaseParam()
 	data["service"] = "query_balance"
 	data["identity_id"] = strings.TrimSpace(userID)
 	if accountType != Default {
 		data["account_type"] = acountTypeList[accountType]
 	}
-	if mode == MemberAccount {
-		data["identity_type"] = "MEMBER_ID"
-	} else {
-		data["identity_type"] = "UID"
-	}
+	data["identity_type"] = identityTypeList[identityType]
 	// data["extend_param"] = ""
 	rs, err := Request(&data, UserMode)
 	if err != nil {
@@ -398,20 +397,16 @@ func QueryBalance(userID string, accountType, mode int) (string, string, map[str
 }
 
 // QueryAccountDetails 查询收支明细 weibopay服务名称：query_account_details
-// param: 用户ID,开始时间,结束时间(格式2006-01-02 15:04:05),页数,每页记录数,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户 ,查询模式:MemberAccount查询自己账户,UserAccount查询用户
+// param: 用户ID,开始时间,结束时间(格式2006-01-02 15:04:05),页数,每页记录数,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户 ,用户账户标识类型:UID,MemberID,Email,Mobile
 // return: 参数列表,收支明细列表
-func QueryAccountDetails(userID, startTime, endTime, pageNo, pageSize string, accountType, mode int) (map[string]string, []map[string]string, error) {
+func QueryAccountDetails(userID, startTime, endTime, pageNo, pageSize string, accountType, identityType int) (map[string]string, []map[string]string, error) {
 	data := initBaseParam()
 	data["service"] = "query_account_details"
 	data["identity_id"] = strings.TrimSpace(userID)
 	if accountType != Default {
 		data["account_type"] = acountTypeList[accountType]
 	}
-	if mode == MemberAccount {
-		data["identity_type"] = "MEMBER_ID"
-	} else {
-		data["identity_type"] = "UID"
-	}
+	data["identity_type"] = identityTypeList[identityType]
 	data["start_time"], data["end_time"] = handleStartEndTime(startTime, endTime)
 	if pageNo == "" {
 		data["page_no"] = defaultPageNo
@@ -445,7 +440,7 @@ func QueryAccountDetails(userID, startTime, endTime, pageNo, pageSize string, ac
 				temp["incordec"] = vArr[2] //增减方向
 				temp["change"] = vArr[3]
 				temp["balance"] = vArr[4]
-				if mode == SavingPot {
+				if accountType == SavingPot {
 					temp["type"] = vArr[5]
 				}
 				list = append(list, temp)
@@ -464,19 +459,19 @@ func QueryAccountDetails(userID, startTime, endTime, pageNo, pageSize string, ac
 	if ok {
 		responParam["totalBonus"] = v.(string)
 	}
-	log.Println(responParam, list)
+	// log.Println(responParam, list)
 	return responParam, list, nil
 }
 
 // BalanceFreeze 冻结余额 weibopay服务名称：balance_freeze
-// param: 用户ID,用户IP,摘要,金额,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户 ,查询模式:MemberAccount查询自己账户,UserAccount查询用户
+// param: 用户ID,用户IP,摘要,金额,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户 ,用户账户标识类型:UID
 // return: 冻结单号(查询状态和解冻用)
-func BalanceFreeze(userID, userIP, summary, amount string, accountType int) (string, error) {
+func BalanceFreeze(userID, userIP, summary, amount string, accountType, identityType int) (string, error) {
 	data := initBaseParam()
 	outFreezeNo := fmt.Sprintf("%s%s", freezeNoPrefix, strconv.FormatInt(time.Now().Local().UnixNano(), 10))
 	data["service"] = "balance_freeze"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	data["out_freeze_no"] = outFreezeNo
 	data["amount"] = strings.TrimSpace(amount)
 	data["summary"] = strings.TrimSpace(summary)
@@ -498,14 +493,14 @@ func BalanceFreeze(userID, userIP, summary, amount string, accountType int) (str
 }
 
 // BalanceUnfreeze 解冻余额 weibopay服务名称：balance_unfreeze
-// param:用户ID,用户IP,原冻结单号,摘要,金额(为空表示全额解冻)
+// param:用户ID,用户IP,原冻结单号,摘要,金额(为空表示全额解冻),用户账户标识类型:UID
 // return: 解冻单号(查询状态用)
-func BalanceUnfreeze(userID, userIP, outFreezeNo, summary, amount string) (string, error) {
+func BalanceUnfreeze(userID, userIP, outFreezeNo, summary, amount string, identityType int) (string, error) {
 	data := initBaseParam()
 	outUnfreezeNo := fmt.Sprintf("%s%s", freezeNoPrefix, strconv.FormatInt(time.Now().Local().UnixNano(), 10))
 	data["service"] = "balance_unfreeze"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	data["out_unfreeze_no"] = outUnfreezeNo
 	data["out_freeze_no"] = strings.TrimSpace(outFreezeNo)
 	if amount != "" {
@@ -555,13 +550,13 @@ func QueryCtrlResult(outCtrlNo string) (bool, error) {
 }
 
 // QueryMemberInfos 查询企业会员信息 weibopay服务名称：query_member_infos
-// param: 用户ID
+// param: 用户ID,用户账户标识类型:UID
 // return: 查询结果
-func QueryMemberInfos(userID string) (map[string]string, error) {
+func QueryMemberInfos(userID string, identityType int) (map[string]string, error) {
 	data := initBaseParam()
 	data["service"] = "query_member_infos"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID" // "MEMBER_ID"
+	data["identity_type"] = identityTypeList[identityType]
 	// data["member_type"] = "2"
 	data["is_mask"] = "Y"
 	// data["extend_param"] = ""
@@ -606,13 +601,13 @@ func QueryMemberInfos(userID string) (map[string]string, error) {
 }
 
 // QueryAuditResult 查询企业会员审核结果 weibopay服务名称：query_audit_result
-// param: 用户ID
+// param: 用户ID,用户账户标识类型:UID
 // return: 是否成功，失败原因(或请求接口报错)
-func QueryAuditResult(userID string) (bool, error) {
+func QueryAuditResult(userID string, identityType int) (bool, error) {
 	data := initBaseParam()
 	data["service"] = "query_audit_result"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	// data["extend_param"] = ""
 	rs, err := Request(&data, UserMode)
 	if err != nil {
@@ -667,13 +662,13 @@ func QueryMiddleAccount(outTradeCode int) ([]map[string]string, error) {
 }
 
 // ModifyVerifyMobile 修改认证手机 weibopay服务名称：modify_verify_mobile
-// param: 用户ID,同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面
+// param: 用户ID,同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面,用户账户标识类型:UID
 // return: 转跳页面
-func ModifyVerifyMobile(userID, notifyURL, returnURL string, mode int) (string, error) {
+func ModifyVerifyMobile(userID, notifyURL, returnURL string, mode, identityType int) (string, error) {
 	data := initBaseParam()
 	data["service"] = "modify_verify_mobile"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	if notifyURL != "" {
 		data["notify_url"] = strings.TrimSpace(notifyURL)
 	}
@@ -697,13 +692,13 @@ func ModifyVerifyMobile(userID, notifyURL, returnURL string, mode int) (string, 
 }
 
 // FindVerifyMobile 修改认证手机 weibopay服务名称：find_verify_mobile
-// param: 用户ID,同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面
+// param: 用户ID,同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面,用户账户标识类型:UID
 // return: 转跳页面
-func FindVerifyMobile(userID, notifyURL, returnURL string, mode int) (string, error) {
+func FindVerifyMobile(userID, notifyURL, returnURL string, mode, identityType int) (string, error) {
 	data := initBaseParam()
 	data["service"] = "find_verify_mobile"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	if notifyURL != "" {
 		data["notify_url"] = strings.TrimSpace(notifyURL)
 	}
@@ -727,13 +722,13 @@ func FindVerifyMobile(userID, notifyURL, returnURL string, mode int) (string, er
 }
 
 // ChangeBankMobile 修改银行预留手机 weibopay服务名称：change_bank_mobile
-// param: 用户ID,卡ID,手机号
+// param: 用户ID,卡ID,手机号,用户账户标识类型:UID
 // return: ticket(推进接口用)
-func ChangeBankMobile(userID, cardID, phone string) (string, error) {
+func ChangeBankMobile(userID, cardID, phone string, identityType int) (string, error) {
 	data := initBaseParam()
 	data["service"] = "change_bank_mobile"
 	data["identity_id"] = strings.TrimSpace(userID)
-	data["identity_type"] = "UID"
+	data["identity_type"] = identityTypeList[identityType]
 	data["card_id"] = strings.TrimSpace(cardID)
 	data["phone_no"] = strings.TrimSpace(phone)
 	// data["extend_param"] = ""

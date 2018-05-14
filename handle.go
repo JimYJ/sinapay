@@ -265,3 +265,15 @@ func handlePayMethod(cardAttr, cardtype, amount, bankCode string) string {
 	}
 	return fmt.Sprintf("online_bank^%s^%s,%s,%s", amount, bankCode, cardAttr, cardtype)
 }
+
+// 拼接代收信息
+func handleSplitList(payerID, payeeID, amount, remarks string, payerIdentityType, payeeIdentityType, payerAccountType, payeeAccountType int) string {
+	payerID = strings.TrimSpace(payerID)
+	payeeID = strings.TrimSpace(payeeID)
+	amount = strings.TrimSpace(amount)
+	remarks = strings.TrimSpace(remarks)
+	return fmt.Sprintf("%s^%s^%s^%s^%s^%s^%s^%s",
+		payerID, identityTypeList[payerIdentityType], acountTypeList[payerAccountType],
+		payeeID, identityTypeList[payeeIdentityType], acountTypeList[payeeAccountType],
+		amount, remarks)
+}
