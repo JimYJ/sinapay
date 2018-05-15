@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/JimYJ/sinapay.svg?branch=master)](https://travis-ci.org/JimYJ/sinapay)
+[![Go Report Card](https://goreportcard.com/badge/github.com/JimYJ/sinapay)](https://goreportcard.com/report/github.com/JimYJ/sinapay)
+
 # sinapay(weibopay)新浪支付 SDK 1.2
 SDK for sinapay(weibopay) API v1.2(WIP)<br>
 根据sinapay 1.2版本接口开发(正在开发中...)

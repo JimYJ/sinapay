@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	userURL  = "https://gate.pay.sina.com.cn/mgs/gateway.do"
-	orderURL = "https://gate.pay.sina.com.cn/mas/gateway.do"
+	userURL   = "https://gate.pay.sina.com.cn/mgs/gateway.do"
+	orderURL  = "https://gate.pay.sina.com.cn/mas/gateway.do"
+	debugMode = false
 )
 
 const (
@@ -78,6 +79,7 @@ func Request(data *map[string]string, mode int) (string, error) {
 		log.Println(err)
 	}
 	rsStr, _ := url.QueryUnescape(string(rs))
+	debugPrint("respon json:", rsStr)
 	return rsStr, err
 }
 
@@ -141,14 +143,22 @@ func getSign(data map[string]string) (string, error) {
 		log.Println(err)
 		return "", errors.New(err)
 	}
-	// log.Println(unsign)
+	debugPrint("unsign string:", unsign)
 	newrsa := GetRSA()
 	return newrsa.Sign(unsign)
 }
 
 // 验签
 func getVerify(data map[string]interface{}) error {
-	sign := data["sign"].(string)
+	var sign string
+	if v, ok := data["sign"]; ok {
+		sign = v.(string)
+	} else {
+		if v2, ok := data["response_message"]; ok {
+			return errors.New(v2.(string))
+		}
+		return errors.New("response is error, pls use debug mode for debug")
+	}
 	delete(data, "sign")
 	delete(data, "sign_type")
 	delete(data, "sign_version")
@@ -295,4 +305,16 @@ func handleSplitList(splitList []map[string]string) string {
 		}
 	}
 	return str
+}
+
+// DebugMode 调试模式,打印请求,响应报文
+func DebugMode() {
+	debugMode = true
+}
+
+// 打印debug日志
+func debugPrint(logs ...interface{}) {
+	if debugMode {
+		log.Println(logs)
+	}
 }
