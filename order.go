@@ -86,6 +86,7 @@ func CreateSingleHostingPayTrade(tradeID, summary, goodsID, payerID, payeeID, us
 		payerIdentityType, payeeIdentityType, payerAccountType, payeeAccountType)
 	data["goods_id"] = strings.TrimSpace(goodsID)
 	data["summary"] = strings.TrimSpace(summary)
+	data["amount"] = strings.TrimSpace(amount)
 	if outTradeCode != CollectionAll {
 		data["out_trade_code"] = outTradeCodeList[outTradeCode]
 	}
