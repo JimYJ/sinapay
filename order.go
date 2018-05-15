@@ -189,7 +189,7 @@ func QueryHostingTrade(tradeID, userID, startTime, endTime, pageNo, pageSize str
 		data["page_size"] = defaultPageSize
 	}
 	// data["extend_param"] = ""
-	rs, err := Request(&data, UserMode)
+	rs, err := Request(&data, OrderMode)
 	if err != nil {
 		log.Println(err)
 		return nil, nil, err
