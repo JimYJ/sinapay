@@ -10,13 +10,21 @@ import (
 var (
 	tradeTimeOut    = "1m"
 	rechargeTimeOut = "15m"
+	withdrawTimeOut = "5m"
 	isRepayList     = []string{"Y", "N"}
+	paytoTypeList   = []string{"FAST", "GENERAL"}
 )
 
 // isRepay 支付失败是否重付
 const (
 	Repay = iota
 	Unrepay
+)
+
+// paytoType 提现到账类型(速度)
+const (
+	Fast = iota
+	General
 )
 
 //CreateHostingCollectTrade 创建托管代收交易 weibopay服务名称：create_hosting_collect_trade
@@ -317,7 +325,7 @@ func QueryHostingRefund(tradeID, userID, startTime, endTime, pageNo, pageSize st
 }
 
 // CreateHostingDeposit 托管充值 weibopay服务名称：create_hosting_deposit
-// param: 交易订单号,摘要,用户ID,用户IP,金额,用户手续费(可空),卡属性,卡类型,银行代码,账户类型() BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户,返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面，是否代付冻结
+// param: 交易订单号,摘要,用户ID,用户IP,金额,用户手续费(可空),卡属性,卡类型,银行代码,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户,返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面,是否代付冻结
 // return: 交易订单号,充值状态,线下支付收款单位,线下支付收款账户,线下支付收款账号开户行,线下支付收款备注,收银台重定向地址
 func CreateHostingDeposit(tradeID, summary, userID, userIP, amount, userFee, cardAttr, cardtype, bankCode string, accountType, mode, identityType int) (map[string]string, error) {
 	data := initBaseParam()
@@ -374,4 +382,172 @@ func CreateHostingDeposit(tradeID, summary, userID, userIP, amount, userFee, car
 		rt["redirectURL"] = v.(string)
 	}
 	return rt, nil
+}
+
+// QueryHostingDeposit 托管充值查询  weibopay服务名称：query_hosting_deposit
+// param: 交易订单号,用户ID,开始时间,结束时间(格式2006-01-02 15:04:05),页数,每页记录数,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户,用户标识类型:UID,MemberID,Email,Mobile
+// return: 响应参数列表,交易记录列表
+func QueryHostingDeposit(tradeID, userID, startTime, endTime, pageNo, pageSize string, accountType, identityType int) (map[string]string, []map[string]string, error) {
+	data := initBaseParam()
+	data["service"] = "query_hosting_deposit"
+	data["identity_id"] = strings.TrimSpace(userID)
+	data["identity_type"] = identityTypeList[identityType]
+	data["out_trade_no"] = strings.TrimSpace(tradeID)
+	data["start_time"], data["end_time"] = handleStartEndTime(startTime, endTime)
+	if pageNo == "" {
+		data["page_no"] = defaultPageNo
+	}
+	if pageSize == "" {
+		data["page_size"] = defaultPageSize
+	}
+	if accountType != Default {
+		data["account_type"] = acountTypeList[accountType]
+	}
+	// data["extend_param"] = ""
+	rs, err := Request(&data, OrderMode)
+	if err != nil {
+		log.Println(err)
+		return nil, nil, err
+	}
+	rsMap, err := checkResponseCode(rs)
+	if err != nil {
+		return nil, nil, err
+	}
+	responParam := make(map[string]string)
+	list := make([]map[string]string, 0)
+	v, ok := rsMap["total_item"]
+	if ok {
+		responParam["totalItem"] = v.(string)
+		totalItem, _ := strconv.Atoi(responParam["totalItem"])
+		if totalItem > 0 {
+			arr := strings.Split(rsMap["deposit_list"].(string), "|")
+			for _, v := range arr {
+				vArr := strings.Split(v, "^")
+				temp := make(map[string]string)
+				temp["outTradeNo"] = vArr[0]
+				temp["amount"] = vArr[1]
+				temp["status"] = vArr[2]
+				temp["createtime"] = vArr[3]
+				temp["lastEditTime"] = vArr[4]
+				list = append(list, temp)
+			}
+		}
+	}
+	v, ok = rsMap["page_no"]
+	if ok {
+		responParam["pageNo"] = v.(string)
+	}
+	v, ok = rsMap["page_size"]
+	if ok {
+		responParam["pagSize"] = v.(string)
+	}
+	return responParam, list, nil
+}
+
+// CreateHostingWithdraw 托管提现  weibopay服务名称：create_hosting_withdraw
+// param: 交易订单号,摘要,金额,用户ID,用户IP,用户手续费(可空),卡ID,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户,用户标识类型:UID,MemberID,Email,Mobile 提现类型:Fast快速,General普通 返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面 提现模式:ture安全模式,转跳收银台操作
+// return: 响应参数:交易订单号,提现状态,收银台重定向地址
+func CreateHostingWithdraw(tradeID, summary, amount, userID, userIP, userFee, cardID string, accountType, identityType, paytoType, mode int, withdrawMode bool) (map[string]string, error) {
+	data := initBaseParam()
+	data["service"] = "create_hosting_withdraw"
+	data["out_trade_no"] = strings.TrimSpace(tradeID)
+	data["identity_id"] = strings.TrimSpace(userID)
+	data["identity_type"] = identityTypeList[identityType]
+	data["summary"] = strings.TrimSpace(summary)
+	data["amount"] = strings.TrimSpace(amount)
+	data["payto_type"] = paytoTypeList[paytoType]
+	data["withdraw_close_time"] = withdrawTimeOut
+	data["user_ip"] = strings.TrimSpace(userIP)
+	data["card_id"] = strings.TrimSpace(cardID)
+	if withdrawMode {
+		data["withdraw_mode"] = "CASHDESK"
+	}
+	if strings.TrimSpace(userFee) != "" {
+		data["user_fee"] = strings.TrimSpace(userFee)
+	}
+	if accountType != Default {
+		data["account_type"] = acountTypeList[accountType]
+	}
+	if mode == RedirectURLMobile {
+		data["cashdesk_addr_category"] = "MOBILE"
+	}
+	// data["extend_param"] = ""
+	rs, err := Request(&data, OrderMode)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	rsMap, err := checkResponseCode(rs)
+	rt := make(map[string]string)
+	if err != nil {
+		return nil, err
+	}
+	rt["out_trade"] = rsMap["out_trade"].(string)
+	if v, ok := rsMap["withdraw_status"]; ok {
+		rt["withdrawStatus"] = v.(string)
+	}
+	if v, ok := rsMap["redirect_url"]; ok {
+		rt["redirectURL"] = v.(string)
+	}
+	return rt, nil
+}
+
+// QueryHostingWithdraw weibopay服务名称：query_hosting_withdraw
+// param: 交易订单号,用户ID,开始时间,结束时间(格式2006-01-02 15:04:05),页数,每页记录数,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户,用户标识类型:UID,MemberID,Email,Mobile
+// return: 响应参数列表,交易记录列表
+func QueryHostingWithdraw(tradeID, userID, startTime, endTime, pageNo, pageSize string, accountType, identityType int) (map[string]string, []map[string]string, error) {
+	data := initBaseParam()
+	data["service"] = "query_hosting_withdraw"
+	data["identity_id"] = strings.TrimSpace(userID)
+	data["identity_type"] = identityTypeList[identityType]
+	data["out_trade_no"] = strings.TrimSpace(tradeID)
+	data["start_time"], data["end_time"] = handleStartEndTime(startTime, endTime)
+	if pageNo == "" {
+		data["page_no"] = defaultPageNo
+	}
+	if pageSize == "" {
+		data["page_size"] = defaultPageSize
+	}
+	if accountType != Default {
+		data["account_type"] = acountTypeList[accountType]
+	}
+	// data["extend_param"] = ""
+	rs, err := Request(&data, OrderMode)
+	if err != nil {
+		log.Println(err)
+		return nil, nil, err
+	}
+	rsMap, err := checkResponseCode(rs)
+	if err != nil {
+		return nil, nil, err
+	}
+	responParam := make(map[string]string)
+	list := make([]map[string]string, 0)
+	v, ok := rsMap["total_item"]
+	if ok {
+		responParam["totalItem"] = v.(string)
+		totalItem, _ := strconv.Atoi(responParam["totalItem"])
+		if totalItem > 0 {
+			arr := strings.Split(rsMap["withdraw_list"].(string), "|")
+			for _, v := range arr {
+				vArr := strings.Split(v, "^")
+				temp := make(map[string]string)
+				temp["outTradeNo"] = vArr[0]
+				temp["amount"] = vArr[1]
+				temp["status"] = vArr[2]
+				temp["createtime"] = vArr[3]
+				temp["lastEditTime"] = vArr[4]
+				list = append(list, temp)
+			}
+		}
+	}
+	v, ok = rsMap["page_no"]
+	if ok {
+		responParam["pageNo"] = v.(string)
+	}
+	v, ok = rsMap["page_size"]
+	if ok {
+		responParam["pagSize"] = v.(string)
+	}
+	return responParam, list, nil
 }
