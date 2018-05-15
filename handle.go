@@ -211,7 +211,7 @@ func checkResponseCode(rs string) (map[string]interface{}, error) {
 	}
 	responseCode := rsMap["response_code"].(string)
 	responseMessage := rsMap["response_message"].(string)
-	log.Println(responseCode, ":", responseMessage)
+	debugPrint("request results:", responseCode, ":", responseMessage)
 	if responseCode != "APPLY_SUCCESS" {
 		return rsMap, errors.New(responseMessage)
 	}
