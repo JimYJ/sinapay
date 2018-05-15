@@ -127,8 +127,7 @@ func PayHostingTrade(outPayNo, userIP, cardAttr, cardType, amount string, list [
 			tradeNoList = fmt.Sprintf("%s^%s", tradeNoList, list[i])
 		}
 	}
-	log.Println(tradeNoList)
-	data["outer_trade_no_list "] = tradeNoList
+	data["outer_trade_no_list"] = tradeNoList
 	rs, err := Request(&data, OrderMode)
 	if err != nil {
 		log.Println(err)
