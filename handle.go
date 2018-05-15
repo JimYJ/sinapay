@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -266,14 +267,32 @@ func handlePayMethod(cardAttr, cardtype, amount, bankCode string) string {
 	return fmt.Sprintf("online_bank^%s^%s,%s,%s", amount, bankCode, cardAttr, cardtype)
 }
 
-// 拼接代收信息
-func handleSplitList(payerID, payeeID, amount, remarks string, payerIdentityType, payeeIdentityType, payerAccountType, payeeAccountType int) string {
-	payerID = strings.TrimSpace(payerID)
-	payeeID = strings.TrimSpace(payeeID)
-	amount = strings.TrimSpace(amount)
-	remarks = strings.TrimSpace(remarks)
-	return fmt.Sprintf("%s^%s^%s^%s^%s^%s^%s^%s",
-		payeeID, identityTypeList[payeeIdentityType], acountTypeList[payeeAccountType],
-		payerID, identityTypeList[payerIdentityType], acountTypeList[payerAccountType],
-		amount, remarks)
+// 拼接代收分账信息
+func handleSplitList(splitList []map[string]string) string {
+	var str string
+	for _, item := range splitList {
+		payerID := strings.TrimSpace(item["payerID"])
+		payeeID := strings.TrimSpace(item["payeeID"])
+		amount := strings.TrimSpace(item["amount"])
+		remarks := strings.TrimSpace(item["remarks"])
+		payeeIdentityType, err := strconv.Atoi(strings.TrimSpace(item["payeeIdentityType"]))
+		payeeAccountType, err2 := strconv.Atoi(strings.TrimSpace(item["payeeAccountType"]))
+		payerIdentityType, err3 := strconv.Atoi(strings.TrimSpace(item["payerIdentityType"]))
+		payerAccountType, err4 := strconv.Atoi(strings.TrimSpace(item["payerAccountType"]))
+		if err != nil || err2 != nil || err3 != nil || err4 != nil || payerID == "" || payeeID == "" || amount == "" {
+			continue
+		}
+		if str == "" {
+			str = fmt.Sprintf("%s^%s^%s^%s^%s^%s^%s^%s",
+				payeeID, identityTypeList[payeeIdentityType], acountTypeList[payeeAccountType],
+				payerID, identityTypeList[payerIdentityType], acountTypeList[payerAccountType],
+				amount, remarks)
+		} else {
+			str = fmt.Sprintf("%s|%s^%s^%s^%s^%s^%s^%s^%s", str,
+				payeeID, identityTypeList[payeeIdentityType], acountTypeList[payeeAccountType],
+				payerID, identityTypeList[payerIdentityType], acountTypeList[payerAccountType],
+				amount, remarks)
+		}
+	}
+	return str
 }

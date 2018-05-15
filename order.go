@@ -77,13 +77,14 @@ func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAt
 // CreateSingleHostingPayTrade 创建托管代付交易 weibopay服务名称：create_single_hosting_pay_trade
 // param: 交易订单号,摘要,标的号,付款用户ID,收款用户ID,付款用户IP,金额,备注,付款用户标识类型，收款用户标识类型:UID,MemberID,Email,Mobile,付款账户类型,收款账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户
 // return: 交易订单号,交易状态
-func CreateSingleHostingPayTrade(tradeID, summary, goodsID, payerID, payeeID, userIP, amount, remarks string, payerIdentityType, payeeIdentityType, payerAccountType, payeeAccountType, outTradeCode int) (string, string, error) {
+func CreateSingleHostingPayTrade(tradeID, summary, goodsID, payerID, payeeID, userIP, amount, remarks string, payerIdentityType, payeeIdentityType, payerAccountType, payeeAccountType, outTradeCode int, splitList []map[string]string) (string, string, error) {
 	data := initBaseParam()
 	data["service"] = "create_single_hosting_pay_trade"
 	data["out_trade_no"] = strings.TrimSpace(tradeID)
 	data["trade_close_time"] = tradeTimeOut
-	data["split_list"] = handleSplitList(payerID, payeeID, amount, remarks,
-		payerIdentityType, payeeIdentityType, payerAccountType, payeeAccountType)
+	if splitList !=nil{
+		data["split_list"] = handleSplitList(splitList)
+	}
 	data["goods_id"] = strings.TrimSpace(goodsID)
 	data["summary"] = strings.TrimSpace(summary)
 	data["amount"] = strings.TrimSpace(amount)
