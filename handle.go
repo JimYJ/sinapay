@@ -211,7 +211,7 @@ func checkResponseCode(rs string) (map[string]interface{}, error) {
 	}
 	responseCode := rsMap["response_code"].(string)
 	responseMessage := rsMap["response_message"].(string)
-	debugPrint("request results:", responseCode, ":", responseMessage)
+	log.Println("request results:", responseCode, ":", responseMessage)
 	if responseCode != "APPLY_SUCCESS" {
 		return rsMap, errors.New(responseMessage)
 	}
@@ -315,6 +315,6 @@ func DebugMode() {
 // 打印debug日志
 func debugPrint(logs ...interface{}) {
 	if debugMode {
-		log.Println(logs)
+		log.Println(logs...)
 	}
 }
