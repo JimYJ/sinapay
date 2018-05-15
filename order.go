@@ -75,14 +75,14 @@ func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAt
 }
 
 // CreateSingleHostingPayTrade 创建托管代付交易 weibopay服务名称：create_single_hosting_pay_trade
-// param: 交易订单号,摘要,标的号,付款用户ID,收款用户ID,付款用户IP,金额,备注,付款用户标识类型，收款用户标识类型:UID,MemberID,Email,Mobile,付款账户类型,收款账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户
+// param: 交易订单号,摘要,标的号,付款用户ID,收款用户ID,付款用户IP,金额,备注,付款用户标识类型，收款用户标识类型:UID,MemberID,Email,Mobile,付款账户类型,收款账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户，代收分账列表:分账不可超过10笔,分账信息中的付款人必须为收款信息中的收款人，或分账信息中的所有收款人
 // return: 交易订单号,交易状态
 func CreateSingleHostingPayTrade(tradeID, summary, goodsID, payerID, payeeID, userIP, amount, remarks string, payerIdentityType, payeeIdentityType, payerAccountType, payeeAccountType, outTradeCode int, splitList []map[string]string) (string, string, error) {
 	data := initBaseParam()
 	data["service"] = "create_single_hosting_pay_trade"
 	data["out_trade_no"] = strings.TrimSpace(tradeID)
 	data["trade_close_time"] = tradeTimeOut
-	if splitList !=nil{
+	if splitList != nil {
 		data["split_list"] = handleSplitList(splitList)
 	}
 	data["goods_id"] = strings.TrimSpace(goodsID)
@@ -127,6 +127,7 @@ func PayHostingTrade(outPayNo, userIP, cardAttr, cardType, amount string, list [
 			tradeNoList = fmt.Sprintf("%s^%s", tradeNoList, list[i])
 		}
 	}
+	log.Println(tradeNoList)
 	data["outer_trade_no_list "] = tradeNoList
 	rs, err := Request(&data, OrderMode)
 	if err != nil {
