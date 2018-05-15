@@ -215,7 +215,9 @@ func QueryHostingTrade(tradeID, userID, startTime, endTime, pageNo, pageSize str
 				temp["status"] = vArr[3]
 				temp["createtime"] = vArr[4]
 				temp["lastEditTime"] = vArr[5]
-				temp["collectAmount"] = vArr[6]
+				if len(vArr) == 7 {
+					temp["collectAmount"] = vArr[6]
+				}
 				list = append(list, temp)
 			}
 		}
