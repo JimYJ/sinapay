@@ -478,7 +478,9 @@ func CreateHostingWithdraw(tradeID, summary, amount, userID, userIP, userFee, ca
 	if err != nil {
 		return nil, err
 	}
-	rt["outTrade"] = rsMap["out_trade_no"].(string)
+	if v, ok := rsMap["out_trade_no"]; ok {
+		rt["outTrade"] = v.(string)
+	}
 	if v, ok := rsMap["withdraw_status"]; ok {
 		rt["withdrawStatus"] = v.(string)
 	}
