@@ -318,3 +318,52 @@ func debugPrint(logs ...interface{}) {
 		log.Println(logs...)
 	}
 }
+
+// 拼接收款方式
+func handleCollectMethod(userID, cardID string, identityType int) string {
+	cardID = strings.TrimSpace(cardID)
+	userID = strings.TrimSpace(userID)
+	IDType := identityTypeList[identityType]
+	return fmt.Sprintf("binding_card^%s,%s,%s", userID, IDType, cardID)
+}
+
+// 拼接代收完成交易列表
+func handleTradeList(TradeList []map[string]string) string {
+	var str string
+	for _, item := range TradeList {
+		requestID := strings.TrimSpace(item["requestID"])
+		tradeID := strings.TrimSpace(item["tradeID"])
+		amount := strings.TrimSpace(item["amount"])
+		summary := strings.TrimSpace(item["summary"])
+		extendParam := strings.TrimSpace(item["extendParam"])
+		if requestID == "" || tradeID == "" || amount == "" || extendParam == "" {
+			continue
+		}
+		if str == "" {
+			str = fmt.Sprintf("%s^%s^%s^%s^%s", requestID, tradeID, amount, summary, extendParam)
+		} else {
+			str = fmt.Sprintf("%s|%s^%s^%s^%s^%s", str, requestID, tradeID, amount, summary, extendParam)
+		}
+	}
+	return str
+}
+
+// 拼接代收完成交易列表
+func handleCancelTradeList(TradeList []map[string]string) string {
+	var str string
+	for _, item := range TradeList {
+		requestID := strings.TrimSpace(item["requestID"])
+		tradeID := strings.TrimSpace(item["tradeID"])
+		summary := strings.TrimSpace(item["summary"])
+		extendParam := strings.TrimSpace(item["extendParam"])
+		if requestID == "" || tradeID == "" || extendParam == "" {
+			continue
+		}
+		if str == "" {
+			str = fmt.Sprintf("%s^%s^%s^%s", requestID, tradeID, summary, extendParam)
+		} else {
+			str = fmt.Sprintf("%s|%s^%s^%s^%s", str, requestID, tradeID, summary, extendParam)
+		}
+	}
+	return str
+}

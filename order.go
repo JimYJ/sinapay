@@ -39,9 +39,7 @@ func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAt
 	data["can_repay_on_failed"] = isRepayList[isRepay]
 	data["goods_id"] = strings.TrimSpace(goodsID)
 	data["summary"] = strings.TrimSpace(summary)
-	if outTradeCode != CollectionAll {
-		data["out_trade_code"] = outTradeCodeList[outTradeCode]
-	}
+	data["out_trade_code"] = outTradeCodeList[outTradeCode]
 	if mode == RedirectURLMobile {
 		data["cashdesk_addr_category"] = "MOBILE"
 	}
@@ -96,9 +94,7 @@ func CreateSingleHostingPayTrade(tradeID, summary, goodsID, payerID, payeeID, us
 	data["goods_id"] = strings.TrimSpace(goodsID)
 	data["summary"] = strings.TrimSpace(summary)
 	data["amount"] = strings.TrimSpace(amount)
-	if outTradeCode != CollectionAll {
-		data["out_trade_code"] = outTradeCodeList[outTradeCode]
-	}
+	data["out_trade_code"] = outTradeCodeList[outTradeCode]
 	//支付参数
 	data["payee_identity_id"] = strings.TrimSpace(payeeID)
 	data["payee_identity_type"] = identityTypeList[payeeIdentityType]
@@ -482,7 +478,7 @@ func CreateHostingWithdraw(tradeID, summary, amount, userID, userIP, userFee, ca
 	if err != nil {
 		return nil, err
 	}
-	rt["out_trade"] = rsMap["out_trade"].(string)
+	rt["outTrade"] = rsMap["out_trade_no"].(string)
 	if v, ok := rsMap["withdraw_status"]; ok {
 		rt["withdrawStatus"] = v.(string)
 	}
@@ -550,4 +546,82 @@ func QueryHostingWithdraw(tradeID, userID, startTime, endTime, pageNo, pageSize 
 		responParam["pagSize"] = v.(string)
 	}
 	return responParam, list, nil
+}
+
+// CreateSingleHostingPaytoCardTrade 创建单笔代付到提现卡交易 weibopay服务名称：create_single_hosting_pay_to_card_trade
+// param:交易订单号,摘要,金额,用户ID,用户IP,卡ID,标的号,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户 用户标识类型:UID,MemberID,Email,Mobile 提现类型:Fast快速,General普通 外部业务码
+// return: 响应参数:交易订单号,提现状态
+func CreateSingleHostingPaytoCardTrade(tradeID, summary, amount, userID, userIP, cardID, goodsID string, identityType, paytoType, outTradeCode int) (map[string]string, error) {
+	data := initBaseParam()
+	data["service"] = "create_single_hosting_pay_to_card_trade"
+	data["out_trade_no"] = strings.TrimSpace(tradeID)
+	data["summary"] = strings.TrimSpace(summary)
+	data["amount"] = strings.TrimSpace(amount)
+	data["payto_type"] = paytoTypeList[paytoType]
+	data["collect_method"] = handleCollectMethod(userID, cardID, identityType)
+	data["user_ip"] = strings.TrimSpace(userIP)
+	data["goods_id"] = strings.TrimSpace(goodsID)
+	data["out_trade_code"] = outTradeCodeList[outTradeCode]
+	// data["creditor_info_list"] = ""
+	// data["extend_param"] = ""
+	rs, err := Request(&data, OrderMode)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	rsMap, err := checkResponseCode(rs)
+	rt := make(map[string]string)
+	if err != nil {
+		return nil, err
+	}
+	rt["outTradeNo"] = rsMap["out_trade_no"].(string)
+	if v, ok := rsMap["withdraw_status"]; ok {
+		rt["withdrawStatus"] = v.(string)
+	}
+	return rt, nil
+}
+
+// FinishPreAuthTrade 代收完成 weibopay服务名称：finish_pre_auth_trade
+// param:请求交易号,用户IP,交易列表
+func FinishPreAuthTrade(outRequestNo, userIP string, TradeList []map[string]string) error {
+	data := initBaseParam()
+	data["service"] = "finish_pre_auth_trade"
+	data["out_request_no"] = strings.TrimSpace(outRequestNo)
+	data["user_ip"] = strings.TrimSpace(userIP)
+	if TradeList != nil {
+		data["trade_list"] = handleTradeList(TradeList)
+	}
+	// data["extend_param"] = ""
+	rs, err := Request(&data, UserMode)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	_, err = checkResponseCode(rs)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// CancelPreAuthTrade 代收撤销 weibopay服务名称：cancel_pre_auth_trade
+// param:请求交易号,交易列表
+func CancelPreAuthTrade(outRequestNo string, TradeList []map[string]string) error {
+	data := initBaseParam()
+	data["service"] = "cancel_pre_auth_trade"
+	data["out_request_no"] = strings.TrimSpace(outRequestNo)
+	if TradeList != nil {
+		data["trade_list"] = handleCancelTradeList(TradeList)
+	}
+	// data["extend_param"] = ""
+	rs, err := Request(&data, UserMode)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	_, err = checkResponseCode(rs)
+	if err != nil {
+		return err
+	}
+	return nil
 }

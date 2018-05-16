@@ -25,15 +25,14 @@ const (
 	Default
 )
 
-//外部业务码
+//外部业务码(交易码)
 const (
 	CollectionMore       = iota //代收-其他
 	CollectionInvestment        //代收投资
 	CollectionRepayment         //代收还款
-	CollectionMoreII            //代收-其他2
-	CollectionLoan              //代收-借款
-	CollectionPrincipal         //代收-本金收益
-	CollectionAll               //代收-全部
+	CollectionMoreII            //代付-其他
+	CollectionLoan              //代付-借款
+	CollectionPrincipal         //代付-本金收益
 )
 
 // 用户账户标识类型 identity_type
@@ -635,9 +634,7 @@ func QueryAuditResult(userID string, identityType int) (bool, error) {
 func QueryMiddleAccount(outTradeCode int) ([]map[string]string, error) {
 	data := initBaseParam()
 	data["service"] = "query_middle_account"
-	if outTradeCode != CollectionAll {
-		data["out_trade_code"] = outTradeCodeList[outTradeCode]
-	}
+	data["out_trade_code"] = outTradeCodeList[outTradeCode]
 	// data["extend_param"] = ""
 	rs, err := Request(&data, UserMode)
 	if err != nil {
