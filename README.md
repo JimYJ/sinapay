@@ -28,8 +28,8 @@ sinapay.InitSinaPay(pid, pubPEM, privPEM, sinapayPubPEM)
 sinapay.TestMode() //use sinapay test URl
 sinapay.DebugMode() //if you want
 ```
-**创建激活会员****  weibopay服务名称：create_activate_member
-**param** :用户请求IP,用户ID,用户账户标识类型:UID
+**创建激活会员****  weibopay服务名称：create_activate_member<br>
+**param** :用户请求IP,用户ID,用户账户标识类型:UID<br>
 ```go
 	sinapay.CreateActiveMember(userIP, userID, identityType)
 ```
