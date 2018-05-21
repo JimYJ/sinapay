@@ -27,7 +27,7 @@ const (
 	General
 )
 
-//CreateHostingCollectTrade 创建托管代收交易 weibopay服务名称：create_hosting_collect_trade
+// CreateHostingCollectTrade 创建托管代收交易 weibopay服务名称：create_hosting_collect_trade
 // param:交易订单号,摘要,标的号,付款用户ID,付款用户IP,卡属性,卡类型,金额,外部业务码,是否失败重付,返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面,用户账户标识类型:UID,是否代付冻结
 // return: 响应参数:交易订单号,交易状态,支付状态,ticket,转跳URL
 func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAttr, cardType, amount string, outTradeCode, isRepay, mode, identityType int, isFreeze bool) (map[string]string, error) {

@@ -741,7 +741,9 @@ func ChangeBankMobile(userID, cardID, phone string, identityType int) (string, e
 	return rsMap["ticket"].(string), nil
 }
 
-//ChangeBankMobileAdvance 修改银行预留手机推进 weibopay服务名称：change_bank_mobile_advance
+// ChangeBankMobileAdvance 修改银行预留手机推进 weibopay服务名称：change_bank_mobile_advance
+// param: ticket(上一个接口获得),手机验证码
+// return: 卡Id,银行卡是否验证
 func ChangeBankMobileAdvance(ticket, validCode string) (string, string, error) {
 	data := initBaseParam()
 	data["service"] = "change_bank_mobile_advance"
