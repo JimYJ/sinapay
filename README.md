@@ -3,7 +3,7 @@
  [![GoDoc](https://godoc.org/github.com/JimYJ/sinapay?status.svg)](https://www.godoc.org/github.com/JimYJ/sinapay)
 
 
-# sinapay(weibopay)新浪支付 SDK 1.2
+# sinapay(weibopay)新浪支付SDK v1.0
 SDK for sinapay(weibopay) API v1.2<br>
 根据sinapay 1.2版本接口开发
 
