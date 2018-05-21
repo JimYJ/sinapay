@@ -28,21 +28,21 @@ sinapay.InitSinaPay(pid, pubPEM, privPEM, sinapayPubPEM)
 sinapay.TestMode() //use sinapay test URl
 sinapay.DebugMode() //if you want
 ```
-**创建激活会员****  weibopay服务名称：create_activate_member<br>
-**param** :用户请求IP,用户ID,用户账户标识类型:UID<br>
+**创建激活会员**  weibopay服务名称：create_activate_member<br>
+**param:** 用户请求IP,用户ID,用户账户标识类型:UID<br>
 ```go
 	sinapay.CreateActiveMember(userIP, userID, identityType)
 ```
 
-**设置用户实名信息**  weibopay服务名称：set_real_name
-**param :用户ID,真实姓名,身份证号,用户请求IP,用户账户标识类型:UID
+**设置用户实名信息**  weibopay服务名称：set_real_name<br>
+**param:** 用户ID,真实姓名,身份证号,用户请求IP,用户账户标识类型:UID<br>
 ```go
 	sinapay.SetRealName(userID, realname, IDNumber, userIP string, identityType int)
 ```
 
-**设置支付密码**  weibopay服务名称：set_pay_password
-**param:** 用户ID,委托扣款展示方式(可空),同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC:返回PC页面,用户账户标识类型:UID
-**return:** 转跳页面
+**设置支付密码**  weibopay服务名称：set_pay_password<br>
+**param:** 用户ID,委托扣款展示方式(可空),同步回跳页面(可空),异步通知接口(可空),返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC:返回PC页面,用户账户标识类型:UID<br>
+**return:** 转跳页面<br>
 ```go
 	sinapay.SetPayPassword(userID, withholdParam, returnURL, notifyURL string, mode, identityType int)
 ```
