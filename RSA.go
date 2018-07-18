@@ -17,7 +17,7 @@ var (
 	// needRSAKey 需要加密的key
 	needRSAKey = map[string]bool{"real_name": true, "cert_no": true, "verify_entity": true, "bank_account_no": true, "account_name": true,
 		"phone_no": true, "validity_period": true, "verification_value": true, "telephone": true, "email": true, "organization_no": true,
-		"legal_person": true, "legal_person_phone": true, "agent_name": true, "license_no": true, "agent_mobile": true, "trade_related_no": true}
+		"legal_person": true, "legal_person_phone": true, "agent_name": true, "license_no": true, "agent_mobile": true}
 	privateKey, publicKey           []byte
 	privateKeyBlock, publicKeyBlock *pem.Block
 	once                            sync.Once
