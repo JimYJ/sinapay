@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -40,6 +41,7 @@ func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAt
 	data["goods_id"] = strings.TrimSpace(goodsID)
 	data["summary"] = strings.TrimSpace(summary)
 	data["out_trade_code"] = outTradeCodeList[outTradeCode]
+	data["trade_related_no"] = strconv.FormatInt(time.Now().Unix(), 10)
 	if mode == RedirectURLMobile {
 		data["cashdesk_addr_category"] = "MOBILE"
 	}
@@ -95,6 +97,7 @@ func CreateSingleHostingPayTrade(tradeID, summary, goodsID, payerID, payeeID, us
 	data["summary"] = strings.TrimSpace(summary)
 	data["amount"] = strings.TrimSpace(amount)
 	data["out_trade_code"] = outTradeCodeList[outTradeCode]
+	data["trade_related_no"] = strconv.FormatInt(time.Now().Unix(), 10)
 	//支付参数
 	data["payee_identity_id"] = strings.TrimSpace(payeeID)
 	data["payee_identity_type"] = identityTypeList[payeeIdentityType]
