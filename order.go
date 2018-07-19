@@ -5,7 +5,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var (
@@ -29,9 +28,9 @@ const (
 )
 
 // CreateHostingCollectTrade 创建托管代收交易 weibopay服务名称：create_hosting_collect_trade
-// param:交易订单号,摘要,标的号,付款用户ID,付款用户IP,卡属性,卡类型,金额,外部业务码,是否失败重付,返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面,用户账户标识类型:UID,是否代付冻结
+// param:交易订单号,摘要,标的号,付款用户ID,付款用户IP,卡属性,卡类型,金额,交易关联号(长度不超过32),外部业务码,是否失败重付,返回页面类型 RedirectURLMobile:返回移动页面,RedirectURLPC返回PC页面,用户账户标识类型:UID,是否代付冻结
 // return: 响应参数:交易订单号,交易状态,支付状态,ticket,转跳URL
-func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAttr, cardType, amount string, outTradeCode, isRepay, mode, identityType int, isFreeze bool) (map[string]string, error) {
+func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAttr, cardType, amount, tradeRelatedNo string, outTradeCode, isRepay, mode, identityType int, isFreeze bool) (map[string]string, error) {
 	data := initBaseParam()
 	//业务参数
 	data["service"] = "create_hosting_collect_trade"
@@ -41,7 +40,7 @@ func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAt
 	data["goods_id"] = strings.TrimSpace(goodsID)
 	data["summary"] = strings.TrimSpace(summary)
 	data["out_trade_code"] = outTradeCodeList[outTradeCode]
-	data["trade_related_no"] = strconv.FormatInt(time.Now().Unix(), 10)[0:31]
+	data["trade_related_no"] = tradeRelatedNo
 	if mode == RedirectURLMobile {
 		data["cashdesk_addr_category"] = "MOBILE"
 	}
@@ -83,9 +82,9 @@ func CreateHostingCollectTrade(tradeID, summary, goodsID, userID, userIP, cardAt
 }
 
 // CreateSingleHostingPayTrade 创建托管代付交易 weibopay服务名称：create_single_hosting_pay_trade
-// param: 交易订单号,摘要,标的号,付款用户ID,收款用户ID,付款用户IP,金额,备注,付款用户标识类型，收款用户标识类型:UID,MemberID,Email,Mobile,付款账户类型,收款账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户，代收分账列表:分账不可超过10笔,分账信息中的付款人必须为收款信息中的收款人，或分账信息中的所有收款人
+// param: 交易订单号,摘要,标的号,付款用户ID,收款用户ID,付款用户IP,金额,备注,交易关联号(长度不超过32),付款用户标识类型，收款用户标识类型:UID,MemberID,Email,Mobile,付款账户类型,收款账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户，代收分账列表:分账不可超过10笔,分账信息中的付款人必须为收款信息中的收款人，或分账信息中的所有收款人
 // return: 交易订单号,交易状态
-func CreateSingleHostingPayTrade(tradeID, summary, goodsID, payerID, payeeID, userIP, amount, remarks string, payerIdentityType, payeeIdentityType, payerAccountType, payeeAccountType, outTradeCode int, splitList []map[string]string) (string, string, error) {
+func CreateSingleHostingPayTrade(tradeID, summary, goodsID, payerID, payeeID, userIP, amount, remarks, tradeRelatedNo string, payerIdentityType, payeeIdentityType, payerAccountType, payeeAccountType, outTradeCode int, splitList []map[string]string) (string, string, error) {
 	data := initBaseParam()
 	data["service"] = "create_single_hosting_pay_trade"
 	data["out_trade_no"] = strings.TrimSpace(tradeID)
@@ -97,7 +96,7 @@ func CreateSingleHostingPayTrade(tradeID, summary, goodsID, payerID, payeeID, us
 	data["summary"] = strings.TrimSpace(summary)
 	data["amount"] = strings.TrimSpace(amount)
 	data["out_trade_code"] = outTradeCodeList[outTradeCode]
-	data["trade_related_no"] = strconv.FormatInt(time.Now().Unix(), 10)[0:31]
+	data["trade_related_no"] = tradeRelatedNo
 	//支付参数
 	data["payee_identity_id"] = strings.TrimSpace(payeeID)
 	data["payee_identity_type"] = identityTypeList[payeeIdentityType]
@@ -554,9 +553,9 @@ func QueryHostingWithdraw(tradeID, userID, startTime, endTime, pageNo, pageSize 
 }
 
 // CreateSingleHostingPaytoCardTrade 创建单笔代付到提现卡交易 weibopay服务名称：create_single_hosting_pay_to_card_trade
-// param:交易订单号,摘要,金额,用户ID,用户IP,卡ID,标的号,账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户 用户标识类型:UID,MemberID,Email,Mobile 提现类型:Fast快速,General普通 外部业务码
+// param:交易订单号,摘要,金额,用户ID,用户IP,卡ID,标的号,交易关联号(长度不超过32),账户类型: BASIC基本户 ENSURE保证金户 RESERVE准备金 SAVING_POT存钱罐 BANK银行账户 用户标识类型:UID,MemberID,Email,Mobile 提现类型:Fast快速,General普通 外部业务码
 // return: 响应参数:交易订单号,提现状态
-func CreateSingleHostingPaytoCardTrade(tradeID, summary, amount, userID, userIP, cardID, goodsID string, identityType, paytoType, outTradeCode int) (map[string]string, error) {
+func CreateSingleHostingPaytoCardTrade(tradeID, summary, amount, userID, userIP, cardID, goodsID, tradeRelatedNo string, identityType, paytoType, outTradeCode int) (map[string]string, error) {
 	data := initBaseParam()
 	data["service"] = "create_single_hosting_pay_to_card_trade"
 	data["out_trade_no"] = strings.TrimSpace(tradeID)
@@ -567,6 +566,7 @@ func CreateSingleHostingPaytoCardTrade(tradeID, summary, amount, userID, userIP,
 	data["user_ip"] = strings.TrimSpace(userIP)
 	data["goods_id"] = strings.TrimSpace(goodsID)
 	data["out_trade_code"] = outTradeCodeList[outTradeCode]
+	data["trade_related_no"] = tradeRelatedNo
 	// data["creditor_info_list"] = ""
 	// data["extend_param"] = ""
 	rs, err := Request(&data, OrderMode)
